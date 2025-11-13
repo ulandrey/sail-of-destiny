@@ -1,0 +1,24 @@
+{
+  "name": "sail-of-destiny",
+  "version": "1.0.0",
+  "description": "🏴‍☠️ Sail of Destiny - Pirate Adventure Telegram Mini App",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "game",
+    "telegram",
+    "mini-app",
+    "pirate",
+    "sailing",
+    "adventure"
+  ],
+  "author": "Game Developer",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "open": "^8.4.0"
+  }
+}

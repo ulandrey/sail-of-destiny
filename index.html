@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏴‍☠️ Sail of Destiny</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Captain Avatar Display -->
+        <div class="captain-avatar" id="captainAvatar">
+            <img id="userAvatar" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM0QUNDRTUiLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyUzYuNDggMjIgMTIgMjJTMjIgMTcuNTIgMjIgMTJTMTcuNTIgMiAxMiAyWk0xMiA2QzkuNzkgNiA4IDcuNzkgOCAxMFM5Ljc5IDE0IDEyIDE0UzE2IDEyLjIxIDE2IDEwUzE0LjIxIDYgMTIgNlY2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cjwvc3ZnPgo=" alt="Captain">
+        </div>
+
+        <!-- Game Header -->
+        <div class="game-header">
+            <div class="score-display">
+                <span class="score-label">🌊 Distance:</span>
+                <span id="distance">0m</span>
+            </div>
+            <div class="health-display">
+                <span class="health-label">⚓ Hull:</span>
+                <div class="health-bar">
+                    <div class="health-fill" id="healthFill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Game Area -->
+        <div class="ocean-container" id="oceanContainer">
+            <div class="game-area" id="gameArea">
+                <!-- Ocean Layers -->
+                <div class="ocean-layer ocean-back" id="oceanBack"></div>
+                <div class="ocean-layer ocean-mid" id="oceanMid"></div>
+                <div class="ocean-layer ocean-front" id="oceanFront"></div>
+
+                <!-- Ship -->
+                <div class="ship" id="ship">
+                    <div class="ship-body">
+                        <div class="sail" id="sail">
+                            <div class="sail-flag" id="sailFlag"></div>
+                        </div>
+                        <div class="ship-hull"></div>
+                    </div>
+                </div>
+
+                <!-- Captain Portrait on Ship -->
+                <div class="captain-portrait" id="captainPortrait">
+                    <img id="shipCaptain" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iMzAiIHZpZXdCb3g9IjAgMCAzMCAzMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTUiIGN5PSIxNSIgcj0iMTUiIGZpbGw9IiM4QjQ1MTMiLz4KPHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAxOCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTkgMUM2LjI0IDEgNCAzLjI0IDQgNlM2LjI0IDExIDkgMTFTMTQgOC43NiAxNCA2UzExLjc2IDEgOSAxWiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cjwvc3ZnPgo=" alt="Captain">
+                </div>
+
+                <!-- Weather Effects -->
+                <div class="weather-overlay" id="weatherOverlay" style="display: none;"></div>
+                <div class="lightning" id="lightning" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Game Controls -->
+        <div class="game-controls" id="gameControls">
+            <button id="startBtn" class="pirate-btn">⚓ Set Sail!</button>
+            <button id="pauseBtn" class="pirate-btn" style="display: none;">⏸️ Pause</button>
+            <button id="leaderboardBtn" class="pirate-btn" style="display: none;">🏆 Leaderboard</button>
+        </div>
+
+        <!-- Ship Shop -->
+        <div class="ship-shop" id="shipShop" style="display: none;">
+            <h3>⚓ Shipyard</h3>
+            <div class="ship-grid" id="shipGrid"></div>
+            <button id="closeShop" class="close-btn">✕</button>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="leaderboard" id="leaderboard" style="display: none;">
+            <h3>🏆 Sailing Legends</h3>
+            <div class="leaderboard-list" id="leaderboardList"></div>
+            <button id="closeLeaderboard" class="close-btn">✕</button>
+        </div>
+
+        <!-- Sound Controls -->
+        <div class="sound-controls">
+            <button id="soundToggle" class="sound-btn">🔊</button>
+        </div>
+
+        <!-- Captain Setup Modal -->
+        <div class="captain-setup" id="captainSetup">
+            <h3>⚓ Ahoy Captain!</h3>
+            <p>Choose your captain appearance:</p>
+            <div class="avatar-options">
+                <button class="avatar-btn" data-avatar="default">👤 Default</button>
+                <button class="avatar-btn" data-avatar="photo">📸 Use Photo</button>
+            </div>
+            <button id="startGame" class="pirate-btn">🏴‍☠️ Begin Voyage</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div class="game-over" id="gameOver" style="display: none;">
+            <h2>🌊 Journey's End</h2>
+            <div class="game-stats">
+                <p>📏 Distance: <span id="finalDistance">0m</span></p>
+                <p>💰 Treasures: <span id="finalTreasures">0</span></p>
+                <p>⭐ Best Run: <span id="bestRun">0m</span></p>
+            </div>
+            <div class="game-over-actions">
+                <button id="retryBtn" class="pirate-btn">⚓ Set Sail Again</button>
+                <button id="shopBtn" class="pirate-btn">🏪 Shipyard</button>
+            </div>
+        </div>
+
+        <!-- Treasure Counter -->
+        <div class="treasure-counter">
+            <span class="treasure-icon">💰</span>
+            <span id="treasureCount">0</span>
+        </div>
+
+        <!-- Boost Indicators -->
+        <div class="boost-indicators" id="boostIndicators">
+            <div class="boost-indicator" id="speedBoost" style="display: none;">
+                <span>💨 Speed</span>
+                <div class="boost-timer"></div>
+            </div>
+            <div class="boost-indicator" id="shieldBoost" style="display: none;">
+                <span>🛡️ Shield</span>
+                <div class="boost-timer"></div>
+            </div>
+            <div class="boost-indicator" id="slowBoost" style="display: none;">
+                <span>⏰ Slow Time</span>
+                <div class="boost-timer"></div>
+            </div>
+        </div>
+
+        <!-- Audio Elements -->
+        <audio id="oceanSound" preload="auto" loop>
+            <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=" type="audio/wav">
+        </audio>
+        <audio id="crashSound" preload="auto">
+            <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=" type="audio/wav">
+        </audio>
+        <audio id="treasureSound" preload="auto">
+            <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=" type="audio/wav">
+        </audio>
+        <audio id="stormSound" preload="auto">
+            <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=" type="audio/wav">
+        </audio>
+        <audio id="lightningSound" preload="auto">
+            <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=" type="audio/wav">
+        </audio>
+    </div>
+
+    <script src="sounds.js"></script>
+    <script src="sail-of-destiny.js"></script>
+</body>
+</html>
