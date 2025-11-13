@@ -201,60 +201,60 @@ class SailOfDestiny {
     }
 
     startGameLoops() {
-        // Main game loop
+        // Main game loop - slower for better performance
         this.gameLoop = setInterval(() => {
             if (!this.isPaused) {
                 this.updateGame();
             }
-        }, 1000 / 60); // 60 FPS
+        }, 1000 / 30); // 30 FPS instead of 60
 
         // Distance counter
         this.distanceLoop = setInterval(() => {
             if (!this.isPaused) {
-                this.distance += Math.floor(this.gameSpeed * 10);
+                this.distance += Math.floor(this.gameSpeed * 5); // Slower distance gain
                 this.distanceDisplay.textContent = this.distance + 'm';
 
                 // Increase difficulty over time
-                if (this.distance % 100 === 0) {
-                    this.gameSpeed += 0.1;
+                if (this.distance % 200 === 0) { // Slower difficulty increase
+                    this.gameSpeed = Math.min(this.gameSpeed + 0.05, 2); // Max speed limit
                 }
             }
-        }, 100);
+        }, 200); // Slower update interval
 
-        // Obstacle spawning
+        // Obstacle spawning - reduced frequency
         this.obstacleLoop = setInterval(() => {
-            if (!this.isPaused && Math.random() < 0.3) {
+            if (!this.isPaused && Math.random() < 0.2 && this.obstacles.length < 6) {
                 this.spawnObstacle();
             }
-        }, 2000);
+        }, 2500);
 
-        // Treasure spawning
+        // Treasure spawning - reduced frequency
         this.treasureLoop = setInterval(() => {
-            if (!this.isPaused && Math.random() < 0.4) {
+            if (!this.isPaused && Math.random() < 0.3 && this.treasureItems.length < 4) {
                 this.spawnTreasure();
             }
-        }, 3000);
+        }, 4000);
 
-        // Power-up spawning
+        // Power-up spawning - reduced frequency
         this.powerUpLoop = setInterval(() => {
-            if (!this.isPaused && Math.random() < 0.2) {
+            if (!this.isPaused && Math.random() < 0.15 && this.powerUps.length < 2) {
                 this.spawnPowerUp();
             }
-        }, 5000);
+        }, 7000);
 
-        // Weather events
+        // Weather events - reduced frequency
         this.weatherLoop = setInterval(() => {
-            if (!this.isPaused && Math.random() < 0.3) {
+            if (!this.isPaused && Math.random() < 0.2) {
                 this.triggerWeatherEvent();
             }
-        }, 8000);
+        }, 12000);
 
         // Update boosts
         this.boostLoop = setInterval(() => {
             if (!this.isPaused) {
                 this.updateBoosts();
             }
-        }, 100);
+        }, 150); // Slower boost updates
     }
 
     updateGame() {
@@ -361,9 +361,14 @@ class SailOfDestiny {
         const types = ['iceberg', 'whirlpool', 'log', 'sea-mine'];
         const type = types[Math.floor(Math.random() * types.length)];
 
+        // Reuse existing obstacles instead of creating new ones
         const obstacle = document.createElement('div');
         obstacle.className = `obstacle ${type}`;
-        obstacle.style.left = Math.random() * (this.gameArea.offsetWidth - 70) + 'px';
+
+        const gameWidth = this.gameArea.offsetWidth;
+        const position = Math.random() * (gameWidth - 50) + 25;
+
+        obstacle.style.left = position + 'px';
         obstacle.style.top = '-100px';
 
         this.gameArea.appendChild(obstacle);
@@ -371,7 +376,8 @@ class SailOfDestiny {
             element: obstacle,
             type: type,
             y: -100,
-            speed: 2 + Math.random() * 2
+            x: position,
+            speed: 1.5 + Math.random() * 1.5 // Slower speeds
         });
     }
 
@@ -431,105 +437,116 @@ class SailOfDestiny {
 
     updateObstacles() {
         const gameSpeed = this.activeBoosts.slowTime > 0 ? 0.3 : 1;
+        const gameHeight = this.gameArea.offsetHeight;
 
-        this.obstacles = this.obstacles.filter(obstacle => {
+        // Process in reverse to avoid skipping elements when removing
+        for (let i = this.obstacles.length - 1; i >= 0; i--) {
+            const obstacle = this.obstacles[i];
             obstacle.y += obstacle.speed * this.gameSpeed * gameSpeed;
             obstacle.element.style.top = obstacle.y + 'px';
 
             // Remove off-screen obstacles
-            if (obstacle.y > this.gameArea.offsetHeight) {
+            if (obstacle.y > gameHeight) {
                 obstacle.element.remove();
-                return false;
+                this.obstacles.splice(i, 1);
             }
-            return true;
-        });
+        }
     }
 
     updateTreasures() {
         const gameSpeed = this.activeBoosts.slowTime > 0 ? 0.3 : 1;
+        const gameHeight = this.gameArea.offsetHeight;
 
-        this.treasureItems = this.treasureItems.filter(treasure => {
+        for (let i = this.treasureItems.length - 1; i >= 0; i--) {
+            const treasure = this.treasureItems[i];
             treasure.y += treasure.speed * this.gameSpeed * gameSpeed;
             treasure.element.style.top = treasure.y + 'px';
 
             // Remove off-screen treasures
-            if (treasure.y > this.gameArea.offsetHeight) {
+            if (treasure.y > gameHeight) {
                 treasure.element.remove();
-                return false;
+                this.treasureItems.splice(i, 1);
             }
-            return true;
-        });
+        }
     }
 
     updatePowerUps() {
         const gameSpeed = this.activeBoosts.slowTime > 0 ? 0.3 : 1;
+        const gameHeight = this.gameArea.offsetHeight;
 
-        this.powerUps = this.powerUps.filter(powerUp => {
+        for (let i = this.powerUps.length - 1; i >= 0; i--) {
+            const powerUp = this.powerUps[i];
             powerUp.y += powerUp.speed * this.gameSpeed * gameSpeed;
             powerUp.element.style.top = powerUp.y + 'px';
 
             // Remove off-screen power-ups
-            if (powerUp.y > this.gameArea.offsetHeight) {
+            if (powerUp.y > gameHeight) {
                 powerUp.element.remove();
-                return false;
+                this.powerUps.splice(i, 1);
             }
-            return true;
-        });
+        }
     }
 
     checkCollisions() {
         const shipRect = this.ship.getBoundingClientRect();
 
-        // Check obstacle collisions
-        this.obstacles.forEach((obstacle, index) => {
+        // Check obstacle collisions - batch processing
+        for (let i = this.obstacles.length - 1; i >= 0; i--) {
+            const obstacle = this.obstacles[i];
             const obstacleRect = obstacle.element.getBoundingClientRect();
 
             if (this.isColliding(shipRect, obstacleRect)) {
-                if (this.activeBoosts.shield > 0) {
-                    // Shield blocks damage
-                    this.showFloatingText('💥 BLOCKED!', obstacleRect.left, obstacleRect.top);
-                    this.sounds.playShieldActivate();
-                } else {
-                    this.takeDamage(20);
-                    this.ship.classList.add('damaged');
-                    setTimeout(() => this.ship.classList.remove('damaged'), 500);
-
-                    // Play specific damage sounds
-                    if (obstacle.type === 'iceberg') {
-                        this.sounds.playIcebergHit();
-                    } else if (obstacle.type === 'whirlpool') {
-                        this.sounds.playWhirlpoolSound();
-                    } else {
-                        this.sounds.playShipCrash();
-                    }
-                }
-
-                obstacle.element.remove();
-                this.obstacles.splice(index, 1);
+                this.handleObstacleCollision(obstacle, i, obstacleRect);
             }
-        });
+        }
 
-        // Check treasure collisions
-        this.treasureItems.forEach((treasure, index) => {
+        // Check treasure collisions - batch processing
+        for (let i = this.treasureItems.length - 1; i >= 0; i--) {
+            const treasure = this.treasureItems[i];
             const treasureRect = treasure.element.getBoundingClientRect();
 
             if (this.isColliding(shipRect, treasureRect)) {
                 this.collectTreasure(treasure);
                 treasure.element.remove();
-                this.treasureItems.splice(index, 1);
+                this.treasureItems.splice(i, 1);
             }
-        });
+        }
 
-        // Check power-up collisions
-        this.powerUps.forEach((powerUp, index) => {
+        // Check power-up collisions - batch processing
+        for (let i = this.powerUps.length - 1; i >= 0; i--) {
+            const powerUp = this.powerUps[i];
             const powerUpRect = powerUp.element.getBoundingClientRect();
 
             if (this.isColliding(shipRect, powerUpRect)) {
                 this.collectPowerUp(powerUp);
                 powerUp.element.remove();
-                this.powerUps.splice(index, 1);
+                this.powerUps.splice(i, 1);
             }
-        });
+        }
+    }
+
+    handleObstacleCollision(obstacle, index, obstacleRect) {
+        if (this.activeBoosts.shield > 0) {
+            // Shield blocks damage
+            this.showFloatingText('💥 BLOCKED!', obstacleRect.left, obstacleRect.top);
+            this.sounds.playShieldActivate();
+        } else {
+            this.takeDamage(15); // Reduced damage
+            this.ship.classList.add('damaged');
+            setTimeout(() => this.ship.classList.remove('damaged'), 300);
+
+            // Play specific damage sounds
+            if (obstacle.type === 'iceberg') {
+                this.sounds.playIcebergHit();
+            } else if (obstacle.type === 'whirlpool') {
+                this.sounds.playWhirlpoolSound();
+            } else {
+                this.sounds.playShipCrash();
+            }
+        }
+
+        obstacle.element.remove();
+        this.obstacles.splice(index, 1);
     }
 
     isColliding(rect1, rect2) {
@@ -697,6 +714,11 @@ class SailOfDestiny {
     }
 
     showFloatingText(text, x, y) {
+        // Limit floating text to prevent performance issues
+        if (this.floatingTextCount >= 3) return;
+
+        this.floatingTextCount = (this.floatingTextCount || 0) + 1;
+
         const floatText = document.createElement('div');
         floatText.className = 'floating-text';
         floatText.textContent = text;
@@ -706,10 +728,10 @@ class SailOfDestiny {
             position: absolute;
             color: #FFD700;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 16px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
             z-index: 150;
-            animation: floatUp 2s ease-out forwards;
+            animation: floatUp 1.5s ease-out forwards;
             pointer-events: none;
         `;
 
@@ -719,7 +741,8 @@ class SailOfDestiny {
             if (floatText.parentNode) {
                 floatText.remove();
             }
-        }, 2000);
+            this.floatingTextCount--;
+        }, 1500);
     }
 
     togglePause() {
